@@ -13,21 +13,6 @@ final busRepositoryProvider = Provider<BusRepository>((ref) {
   return BusRepository();
 });
 
-/// 현재 선택된 출퇴근 탭 상태 (출근길 / 퇴근길 / 전체)
-class CommuteTagNotifier extends Notifier<CommuteTag> {
-  @override
-  CommuteTag build() {
-    final hour = DateTime.now().hour;
-    // 오전 0시~13시는 기본 [출근길], 오후 13시~24시는 기본 [퇴근길]로 스마트 전환
-    return hour < 13 ? CommuteTag.commuteToWork : CommuteTag.commuteHome;
-  }
-
-  void setTag(CommuteTag tag) => state = tag;
-}
-
-final selectedCommuteTagProvider =
-    NotifierProvider<CommuteTagNotifier, CommuteTag>(CommuteTagNotifier.new);
-
 class BusDashboardState {
   final bool isLoading;
   final List<FavoriteRoute> allFavorites;

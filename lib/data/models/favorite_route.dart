@@ -1,24 +1,16 @@
 import 'dart:convert';
 
-/// 즐겨찾기 버스 + 정류장 프리셋 모델
-enum CommuteTag {
-  commuteToWork, // 출근길
-  commuteHome, // 퇴근길
-  general, // 일반
-}
-
+/// 즐겨찾기 등록된 버스 노선 모델 (양방향 방면 정보 포함)
 class FavoriteRoute {
   final String id;
   final String routeId;
-  final String routeName; // 예: 9401, 7727
-  final String routeType; // 간선, 지선, 광역 등
+  final String routeName; // 예: 143, 7016, 9401, 420
+  final String routeType; // 간선, 지선, 광역, 마을 등
   final String stationId;
-  final String stationName; // 예: 한남동, 광화문
-  final String direction; // 방면 (예: 서울역 방면, 분당 방면)
-  final String stationSeq;
-  final CommuteTag tag;
+  final String stationName; // 기준 정류장 (예: 강남역, 서현역.AK플라자)
+  final String directionA; // A 방면 (예: 정릉 방면, 서울역 방면)
+  final String directionB; // B 방면 (예: 개포동 방면, 분당 방면)
   final int orderIndex;
-  final bool isDefault;
 
   const FavoriteRoute({
     required this.id,
@@ -27,11 +19,9 @@ class FavoriteRoute {
     required this.routeType,
     required this.stationId,
     required this.stationName,
-    this.direction = '',
-    this.stationSeq = '1',
-    this.tag = CommuteTag.commuteToWork,
+    this.directionA = '',
+    this.directionB = '',
     this.orderIndex = 0,
-    this.isDefault = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -42,11 +32,9 @@ class FavoriteRoute {
       'routeType': routeType,
       'stationId': stationId,
       'stationName': stationName,
-      'direction': direction,
-      'stationSeq': stationSeq,
-      'tag': tag.name,
+      'directionA': directionA,
+      'directionB': directionB,
       'orderIndex': orderIndex,
-      'isDefault': isDefault,
     };
   }
 
@@ -58,14 +46,9 @@ class FavoriteRoute {
       routeType: map['routeType'] ?? '간선',
       stationId: map['stationId'] ?? '',
       stationName: map['stationName'] ?? '',
-      direction: map['direction'] ?? '',
-      stationSeq: map['stationSeq'] ?? '1',
-      tag: CommuteTag.values.firstWhere(
-        (e) => e.name == map['tag'],
-        orElse: () => CommuteTag.commuteToWork,
-      ),
+      directionA: map['directionA'] ?? map['direction'] ?? '상행 방면',
+      directionB: map['directionB'] ?? '하행 방면',
       orderIndex: map['orderIndex'] ?? 0,
-      isDefault: map['isDefault'] ?? false,
     );
   }
 

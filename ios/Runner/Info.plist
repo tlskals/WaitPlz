@@ -68,5 +68,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<!-- 네이버 지도 Client ID -->
+	<key>NMFClientId</key>
+	<string>ithd2c5slo</string>
 </dict>
 </plist>

@@ -17,11 +17,98 @@
 
 ## 📅 일자별 개발 일지
 
+### 🗓️ 2026-10-09 - 네이버 지도 SDK 연동 및 스마트 하차 알람(3번 탭) 지도 레이더 뷰 구축
+
+#### 💬 주요 논의 및 기획 의사결정
+1. **네이버 클라우드 플랫폼(Ncloud) Maps SDK 연동**
+   - 발급받은 네이버 지도 Client ID(`ithd2c5slo`)를 iOS `Info.plist`(`NMFClientId`), Android `AndroidManifest.xml` 및 [`api_constants.dart`](file:///Users/tlskals/ProjectW/lib/core/constants/api_constants.dart)에 등록.
+   - 앱 구동 시점([`main.dart`](file:///Users/tlskals/ProjectW/lib/main.dart))에서 `FlutterNaverMap.init` 초기화 파이프라인 구축.
+2. **스마트 하차 알람 카드 내 실시간 네이버 지도 레이더 뷰 적용**
+   - 활성화된 하차 알람 카드에 목적지 마커 + 네온 라임 반경 서클(`NCircleOverlay`) 오버레이 및 `((•)) 반경 1km` 뱃지 렌더링.
+3. **하차 알람 위치 설정 화면 인터랙티브 맵 연동**
+   - 지도 터치 시 원하는 위치로 핀 이동(`onMapTapped`), 실시간 반경 슬라이더(300m~2,000m) 조작에 따른 네온 라임 서클 오버레이 실시간 갱신.
+
+#### 🛠️ 작업 내용
+- [x] [`api_constants.dart`](file:///Users/tlskals/ProjectW/lib/core/constants/api_constants.dart): 네이버 지도 Client ID 및 Secret 등록
+- [x] `ios/Runner/Info.plist` & `android/app/src/main/AndroidManifest.xml`: Native Naver Map SDK Client ID 설정
+- [x] [`main.dart`](file:///Users/tlskals/ProjectW/lib/main.dart): `FlutterNaverMap.init` 초기화 적용
+- [x] [`transit_alarm_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/transit_alarm_screen.dart): 네이버 지도 임베딩 및 반경 오버레이 뷰 구현
+- [x] [`set_alarm_map_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/set_alarm_map_screen.dart): 인터랙티브 네이버 지도 터치/슬라이더 위치 설정 구현
+- [x] 정적 분석(`flutter analyze` 0 issues) 검증 완료
+
+---
+
+### 🗓️ 2026-10-09 - 서울시 지하철 실시간 열차 도착 REST API 연동 완료 (2번 탭)
+
+#### 💬 주요 논의 및 기획 의사결정
+1. **서울 열린데이터광장 공식 지하철 API 연동**
+   - 발급받은 서울시 오픈데이터 인증키(`4c487748...`)를 기반으로 수도권 전 노선(1~9호선, 신분당선, 수인분당선, 경의중앙선, 공항철도, 경강선, GTX-A 등)의 실시간 열차 위치 및 도착 정보(`realtimeStationArrival`) 연동.
+2. **호선별 공식 색상 배지 & 급행 열차 구분**
+   - 각 호선별 고유 색상 및 급행 뱃지, 종착역 방면명(`[상행] 광운대행 - 시청방면`), 도착 예정 시간(`전역 출발`, `2분 후`)을 실시간 렌더링.
+3. **역 검색 및 주요 환승역 퀵 선택**
+   - 상단 검색창에서 원하는 역을 검색하거나 빠른 칩(서울역, 강남, 사당, 판교, 신도림, 홍대입구, 여의도, 고속터미널 등)을 눌러 실시간 정보 즉시 조회.
+
+#### 🛠️ 작업 내용
+- [x] [`api_constants.dart`](file:///Users/tlskals/ProjectW/lib/core/constants/api_constants.dart): 서울 열린데이터광장 지하철 API 키 등록
+- [x] [`subway_api_service.dart`](file:///Users/tlskals/ProjectW/lib/data/datasources/subway_api_service.dart): 서울시 실시간 지하철 도착 API 클라이언트 및 호선 매핑 구축
+- [x] [`subway_repository.dart`](file:///Users/tlskals/ProjectW/lib/data/repositories/subway_repository.dart): `SubwayApiService` 실시간 연동 및 Fallback 처리
+- [x] [`subway_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/subway/subway_screen.dart): 역 검색창, 주요 역 칩, 공식 실시간 피드 뱃지, 당김 새로고침 UI 적용
+- [x] 정적 분석(`flutter analyze` 0 issues) 및 시뮬레이터 Hot Restart 반영 완료
+
+---
+
+### 🗓️ 2026-10-09 - 버스 등록 UX 전면 개편 (동명 버스 검증 & 노선도 타임라인 정류장 선택)
+
+#### 💬 주요 논의 및 기획 의사결정
+1. **수동 텍스트 입력 제거 & 자동화**
+   - 버스 유형(간선/지선/마을 등) 수동 선택 칩 및 A/B 방면 텍스트 수동 입력창 제거.
+2. **동명 버스 검증 & 실시간 노선 검색 지원**
+   - 버스 번호(예: `1`, `143`, `9401`, `마포09`) 입력 시 지역(서울, 경기, 부천, 수원 등) 및 기종점(`도봉산 ⇋ 종로2가`, `부천대 ⇋ 신도림`)을 함께 노출하여 동일 번호의 다른 버스를 명확히 구분.
+3. **버스 노선도(정류장 리스트) 시각화 & 원터치 정류장 선택**
+   - 버스 선택 시 해당 노선의 경유 정류장을 세로 타임라인 노선도로 표시.
+   - 정류장 내부 검색 또는 스크롤을 통해 내가 타는 정류장을 탭(Click)하면 기종점 기반 양방향(A/B) 도착 정보가 자동 연동되어 대시보드에 즉시 등록.
+
+#### 🛠️ 작업 내용
+- [x] [`bus_route_detail.dart`](file:///Users/tlskals/ProjectW/lib/data/models/bus_route_detail.dart): `BusRouteDetail` 및 `BusStopItem` 노선도 데이터 모델 신설
+- [x] [`bus_repository.dart`](file:///Users/tlskals/ProjectW/lib/data/repositories/bus_repository.dart): 서울/경기 주요 노선(`143`, `1(서울)`, `1(부천)`, `1(수원)`, `7016`, `9401`, `420`, `M5107`, `마포09`, `5601`) 노선도 데이터셋 구축 및 실시간 검색 API(`searchBusRoutes`) 구현
+- [x] [`add_bus_route_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/bus/add_bus_route_screen.dart):
+  - [1단계] 실시간 버스 번호 검색 및 지역/기종점 카드 리스트
+  - [2단계] 노선도 타임라인 뷰 및 정류장 간이 검색 & 원터치 선택 바 구현
+- [x] `flutter analyze` (0 issues) 및 `flutter test` 검증 완료 및 시뮬레이터 Hot Restart 반영
+
+---
+
+### 🗓️ 2026-10-09 - 버스 대시보드(1번 탭) 양방향 50:50 분할 & 접이식(Expandable) UI 전면 개편
+
+#### 💬 주요 논의 및 기획 의사결정
+1. **출퇴근 탭 분리 제거 & 상단 헤더 슬림화**
+   - 출근길/퇴근길을 굳이 나눌 필요 없이, 등록된 버스의 **상행(A방면)과 하행(B방면)** 양방향 정보를 한 카드 안에서 한눈에 파악할 수 있도록 탭 구조를 간소화.
+2. **양방향(A방면 | B방면) 50:50 분할 카드 & 컴팩트 레이아웃**
+   - 카드 내부를 좌/우 절반으로 나누어 양쪽 방면의 가장 빠른 버스 정보를 직관적으로 비교/확인할 수 있도록 개선.
+3. **접이식(Expandable Accordion) 인터랙션 도입**
+   - 기본 상태: 한 화면에 많은 버스가 들어오도록 컴팩트한 높이로 **가장 빠른 1차 버스**만 노출.
+   - 클릭 시: 부드럽게 펼쳐지며 **2차, 3차 뒤차 도착 예정 시간 및 잔여석/차량 정보** 노출.
+4. **연속 배차 감지 배너 및 경고 문구 전면 제거**
+   - 시각적 노이즈를 줄이고 가독성을 극대화하기 위해 연속 배차 알림 제거.
+5. **일반 시내버스(간선/지선) 데이터 다양화 & 잔여석 구분**
+   - `143`(간선 파랑), `7016`(지선 초록), `9401`(광역 빨강), `420`(간선 파랑) 등 다양한 버스 노선 샘플 구성.
+   - 일반버스는 잔여석 배지를 표시하지 않고, 광역버스에만 좌석 정보를 노출하도록 차별화.
+
+#### 🛠️ 작업 내용
+- [x] [`bus_arrival_info.dart`](file:///Users/tlskals/ProjectW/lib/data/models/bus_arrival_info.dart): 양방향(`directionA`, `directionB`) 및 단일 도착 정보(`SingleBusArrival`, `DirectionArrival`) 데이터 모델 정의
+- [x] [`favorite_route.dart`](file:///Users/tlskals/ProjectW/lib/data/models/favorite_route.dart): 양방향 방면(`directionA`, `directionB`) 필드 추가
+- [x] [`bus_repository.dart`](file:///Users/tlskals/ProjectW/lib/data/repositories/bus_repository.dart): 간선(143), 지선(7016), 광역(9401), 간선(420) 등 다채로운 양방향 실시간 도착 데이터 연동
+- [x] [`bus_arrival_card.dart`](file:///Users/tlskals/ProjectW/lib/presentation/widgets/bus_arrival_card.dart): 좌우 50:50 분할 및 탭 확장(Accordion) 애니메이션 위젯 구현
+- [x] [`bus_dashboard_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/bus/bus_dashboard_screen.dart): 상단 출퇴근 탭 및 연속배차 배너 제거, 슬림 실시간 헤더 적용
+- [x] iOS 시뮬레이터(iPhone 16 Plus) 구동 및 UI 렌더링 검증 완료
+
+---
+
 ### 🗓️ 2026-10-08 ~ 10-09 - 프로젝트 킥오프, 기획 수립, 핵심 4개 탭 및 다크/네온 테마 구현
 
 #### 💬 주요 논의 및 기획 의사결정
 1. **기획 의도 및 3대 핵심 킬러 기능 정의**
-   * **기능 1 (🚍 출퇴근 0클릭 버스 대시보드)**: 집/회사에서 출발 전, 현재 위치와 무관하게 내가 탈 버스와 승차 정류장을 미리 등록하여 앱을 켜자마자 잔여 시간/정류장/좌석 정보를 즉시 확인. 연속 배차(1~2정거장 차이로 겹쳐 오는 버스) 감지 알림.
+   * **기능 1 (🚍 출퇴근 0클릭 버스 대시보드)**: 집/회사에서 출발 전, 현재 위치와 무관하게 내가 탈 버스와 승차 정류장을 미리 등록하여 앱을 켜자마자 잔여 시간/정류장/좌석 정보를 즉시 확인.
    * **기능 2 (🚇 지하철 도착 & 지연/시위 공지)**: 실시간 열차 도착 정보와 함께 시위, 사고, 단전, 신호장애 등으로 인한 지연 소식 및 운행 사유 제공.
    * **기능 3 (⏰ 스마트 하차 알람 - "기사님, 잠시만요!")**: 광역버스나 지하철에서 잠들어도 목적지 반경(300m~2,000m) 진입 시 화면이 꺼져 있어도 강력한 진동과 소리로 깨워주는 루틴 토글 알람.
    * **기능 4 (⚙️ 설정 & 환경설정)**: 기본 하차 반경, 진동 세기, 공공데이터 출처 표기.
@@ -48,17 +135,5 @@
 - [x] 핵심 데이터 모델 구현 (`BusArrivalInfo`, `FavoriteRoute`, `TransitAlarmItem`, `SubwayArrivalInfo`, `SubwayAlertNotice`)
 - [x] 로컬 저장소(`LocalStorageService`) 및 로컬 푸시 알람/진동 매니저(`NotificationService`) 구축 (직장인 샘플 데이터 자동 세팅)
 - [x] Riverpod 3.x Notifier 기반 상태 관리 (`BusDashboardNotifier`, `SubwayProvider`, `AlarmNotifier`)
-- [x] 메인 네비게이션 4개 탭 화면 구축:
-  1. [`bus_dashboard_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/bus/bus_dashboard_screen.dart) (출근/퇴근 자동 전환, 연속 배차 감지 배너, 15초 자동 갱신)
-  2. [`subway_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/subway/subway_screen.dart) (실시간 도착 + 시위/지연 긴급 공지 피드)
-  3. [`transit_alarm_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/transit_alarm_screen.dart) (즐겨찾는/일반 도착지 토글, 레이더 맵 뷰, 반경 뱃지, 즉시 테스트)
-  4. [`settings_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/settings/settings_screen.dart) (환경설정, 데이터 출처, 라이선스)
-- [x] 버스/정류장 등록 화면([`add_bus_route_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/bus/add_bus_route_screen.dart)) & 하차 알람 추가 화면([`set_alarm_map_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/set_alarm_map_screen.dart)) 구현
+- [x] 메인 네비게이션 4개 탭 화면 구축
 - [x] `flutter analyze` (0 issues) 및 `flutter test` (위젯 스모크 테스트 통과) 정적 분석/테스트 검증 완료
-
----
-
-#### 🔜 다음 작업 계획
-- [ ] 시뮬레이터 구동 및 실제 기기 화면 인터랙션/디자인 디테일 튜닝
-- [ ] 공공데이터포털(TAGO) 및 서울시 TOPIS 실제 REST API 키 연동 모듈 작성
-- [ ] 네이버 지도 Native SDK 활성화 및 백그라운드 GPS 위치 추적 워커 고도화

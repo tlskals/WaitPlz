@@ -3,7 +3,7 @@ import '../../data/models/favorite_route.dart';
 import '../../data/models/transit_alarm_item.dart';
 
 class LocalStorageService {
-  static const String _keyFavoriteRoutes = 'favorite_routes_v1';
+  static const String _keyFavoriteRoutes = 'favorite_routes_v2';
   static const String _keyTransitAlarms = 'transit_alarms_v1';
 
   final SharedPreferences _prefs;
@@ -17,46 +17,53 @@ class LocalStorageService {
     return service;
   }
 
-  /// 최초 실행 시 직장인 맞춤형 샘플 데이터 세팅 (출근/퇴근 프리셋)
+  /// 최초 실행 시 직장인/통학생 맞춤형 다양한 버스 샘플 데이터 세팅 (간선, 지선, 광역)
   Future<void> _initSampleDataIfEmpty() async {
     if (!_prefs.containsKey(_keyFavoriteRoutes)) {
       final defaultRoutes = [
         const FavoriteRoute(
-          id: 'sample_route_1',
+          id: 'sample_route_143',
+          routeId: '100100022',
+          routeName: '143',
+          routeType: '간선',
+          stationId: '101000001',
+          stationName: '강남역',
+          directionA: '정릉 방면',
+          directionB: '개포동 방면',
+          orderIndex: 0,
+        ),
+        const FavoriteRoute(
+          id: 'sample_route_7016',
+          routeId: '100100345',
+          routeName: '7016',
+          routeType: '지선',
+          stationId: '113000023',
+          stationName: '홍대입구역',
+          directionA: '상명대 방면',
+          directionB: '은평차고지 방면',
+          orderIndex: 1,
+        ),
+        const FavoriteRoute(
+          id: 'sample_route_9401',
           routeId: '100100073',
           routeName: '9401',
           routeType: '광역',
           stationId: '206000001',
           stationName: '서현역.AK플라자',
-          direction: '서울역버스환승센터 방면',
-          stationSeq: '15',
-          tag: CommuteTag.commuteToWork,
-          orderIndex: 0,
-          isDefault: true,
+          directionA: '서울역 방면',
+          directionB: '분당 구미동 방면',
+          orderIndex: 2,
         ),
         const FavoriteRoute(
-          id: 'sample_route_2',
-          routeId: '100100582',
-          routeName: 'M5107',
-          routeType: '광역',
-          stationId: '228000710',
-          stationName: '영통역',
-          direction: '서울역 방면',
-          stationSeq: '5',
-          tag: CommuteTag.commuteToWork,
-          orderIndex: 1,
-        ),
-        const FavoriteRoute(
-          id: 'sample_route_3',
-          routeId: '100100073',
-          routeName: '9401',
-          routeType: '광역',
-          stationId: '101000001',
-          stationName: '순천향대학병원',
-          direction: '분당 구미동 방면',
-          stationSeq: '32',
-          tag: CommuteTag.commuteHome,
-          orderIndex: 0,
+          id: 'sample_route_420',
+          routeId: '100100067',
+          routeName: '420',
+          routeType: '간선',
+          stationId: '122000015',
+          stationName: '역삼역',
+          directionA: '청량리 방면',
+          directionB: '개포동 방면',
+          orderIndex: 3,
         ),
       ];
       await saveFavoriteRoutes(defaultRoutes);
