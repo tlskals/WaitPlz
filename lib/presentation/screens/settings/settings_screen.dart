@@ -348,18 +348,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: AppColors.neonLime,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.neonLime.withValues(alpha: 0.25),
+                      color: AppColors.neonLime.withValues(alpha: 0.2),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: const Center(
-                  child: Icon(Icons.alarm_on, color: Colors.black, size: 30),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/icon/app_icon.png',
+                    width: 52,
+                    height: 52,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(width: 14),

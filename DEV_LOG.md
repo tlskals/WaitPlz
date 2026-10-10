@@ -17,6 +17,32 @@
 
 ## 📅 일자별 개발 일지
 
+### 🗓️ 2026-10-10 (추가 3) - 신규 8비트 청키 도트 펭귄 앱 아이콘 & 네이티브 스플래시 화면 구축
+
+#### 💬 주요 논의 및 기획 의사결정
+1. **전작 캐릭터 계승 & 친숙한 8비트 청키 도트(Pixel Art) 전용 브랜딩 구축**
+   - 기존의 흔한 템플릿 로고 대신, 전작의 펭귄 캐릭터 정체성을 살려 "모자를 벗고 땀을 뻘뻘 흘리며 떠나가는 버스를 향해 헐레벌떡 달려가는 펭귄" 신규 아트워크 확정.
+   - 너무 복잡하고 쨍한 그래픽 대신 사용자 피드백을 반영하여 친숙하고 투박한(허접귀여운) 8비트 레트로 청키 픽셀 아트로 단순화.
+   - 버스 전광판 글자 제거, 정류장 표지판과 출발하는 버스 뒤 퐁퐁 피어오르는 배기 연기로 "기사님, 잠시만요!"의 극적인 상황과 위트를 시각적으로 완성.
+   - 다크 슬레이트 네이비(`#303646`) 톤으로 앱의 다크 테마와 매끄럽게 연결되는 1024x1024 마스터 아이콘 에셋(`assets/icon/app_icon.png`) 제작.
+2. **iOS & Android 크로스 플랫폼 앱 런처 아이콘 자동 빌드**
+   - `flutter_launcher_icons` 패키지 구성 및 실행으로 iOS `AppIcon.appiconset` 전체 규격(1024px, 60pt@2x/3x, 40pt, 29pt, 20pt) 및 Android 전체 `mipmap`(`mdpi`~`xxxhdpi`) 아이콘 자동 교체 완료.
+   - 4번 탭([`settings_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/settings/settings_screen.dart)) 앱 프로필 카드에도 새 펭귄 아이콘 에셋을 적용하여 앱 내부에서도 일관된 브랜드 경험 제공.
+3. **네이티브 스플래시 화면 구축 (`flutter_native_splash`)**
+   - 앱 첫 실행 시 흰 화면 깜빡임 현상을 방지하기 위해 iOS `LaunchScreen.storyboard` 및 Android 12+ 대응 `launch_background.xml` 네이티브 스플래시 자동 구성 완료.
+   - 다크 슬레이트 배경(`#303646`) + 중앙 펭귄 버스 로고(`assets/splash/splash_logo.png`)로 부팅 시부터 고급스러운 몰입감 선사.
+
+#### 🛠️ 작업 내용
+- [x] [`assets/icon/app_icon.png`](file:///Users/tlskals/ProjectW/assets/icon/app_icon.png): 8비트 청키 도트 펭귄 1024x1024 마스터 앱 아이콘 생성
+- [x] [`assets/splash/splash_logo.png`](file:///Users/tlskals/ProjectW/assets/splash/splash_logo.png): 512x512 스플래시 전용 로고 에셋 생성
+- [x] [`pubspec.yaml`](file:///Users/tlskals/ProjectW/pubspec.yaml): `flutter_launcher_icons`, `flutter_native_splash` 설정 및 에셋 디렉토리 등록
+- [x] `flutter_launcher_icons` 빌드로 iOS `AppIcon.appiconset` 및 Android `mipmap` 리소스 전체 교체
+- [x] `flutter_native_splash` 빌드로 iOS `LaunchScreen` 및 Android 12+ 런처 백그라운드 세팅
+- [x] [`settings_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/settings/settings_screen.dart): 앱 프로필 헤더에 신규 펭귄 아이콘 에셋 반영
+- [x] 정적 분석(`flutter analyze` No issues) 및 `flutter test` 100% 통과 검증 완료
+
+---
+
 ### 🗓️ 2026-10-10 (추가 2) - 4번 탭 환경설정 전면 개편: 반응형 진동 세기 선택 및 즉시 체감 테스트 & 전역 설정 센터 구축
 
 #### 💬 주요 논의 및 기획 의사결정
