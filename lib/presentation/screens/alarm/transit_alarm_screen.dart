@@ -12,6 +12,8 @@ class TransitAlarmScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final alarms = ref.watch(alarmProvider);
+    final locationState = ref.watch(userLocationProvider);
+    final distances = ref.watch(alarmDistancesProvider);
 
     final favoriteAlarms = alarms.where((a) => a.isEnabled).toList();
     final generalAlarms = alarms.where((a) => !a.isEnabled).toList();
@@ -42,17 +44,22 @@ class TransitAlarmScreen extends ConsumerWidget {
       ),
       body: CustomScrollView(
         slivers: [
-          // 1. [활성화된 하차 알람] 헤더
+          // 0. 실시간 GPS 신호 & 지오펜싱 상태 바
+          SliverToBoxAdapter(
+            child: _buildGpsStatusBar(context, ref, locationState),
+          ),
+
+          // 1. [동작 중인 하차 알람] 헤더
           if (favoriteAlarms.isNotEmpty) ...[
             const SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(20, 16, 20, 10),
+                padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
                 child: Row(
                   children: [
                     Icon(Icons.radar, color: AppColors.neonLime, size: 18),
                     SizedBox(width: 6),
                     Text(
-                      '동작 중인 하차 알람',
+                      '동작 중인 하차 알람 (실시간 추적)',
                       style: TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w800,
@@ -67,7 +74,9 @@ class TransitAlarmScreen extends ConsumerWidget {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final alarm = favoriteAlarms[index];
-                  return _buildActiveAlarmCard(context, ref, alarm);
+                  final distance = distances[alarm.id];
+                  return _buildActiveAlarmCard(
+                      context, ref, alarm, distance, locationState);
                 },
                 childCount: favoriteAlarms.length,
               ),
@@ -131,6 +140,7 @@ class TransitAlarmScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'alarm_tab_fab',
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const SetAlarmMapScreen()),
@@ -143,10 +153,112 @@ class TransitAlarmScreen extends ConsumerWidget {
     );
   }
 
-  /// 활성화된 하차 알람 카드 (네이버 지도 레이더 뷰 + 반경 뱃지)
+  /// GPS 상태 헤더 인디케이터
+  Widget _buildGpsStatusBar(
+      BuildContext context, WidgetRef ref, UserLocationState locState) {
+    final isTracking = locState.isTracking && locState.position != null;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isTracking
+              ? AppColors.neonLime.withValues(alpha: 0.3)
+              : AppColors.cardBorder,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isTracking ? AppColors.neonLime : AppColors.urgentWarning,
+              boxShadow: isTracking
+                  ? [
+                      BoxShadow(
+                        color: AppColors.neonLime.withValues(alpha: 0.6),
+                        blurRadius: 6,
+                        spreadRadius: 2,
+                      )
+                    ]
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              isTracking
+                  ? '실시간 GPS 위성 연결됨 (거리 자동 계산 중)'
+                  : (locState.errorMessage ?? '위치 권한 확인 필요'),
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: isTracking
+                    ? AppColors.textPrimary
+                    : AppColors.textSecondary,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              ref.read(userLocationProvider.notifier).refreshCurrentPosition();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceElevated,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.refresh, color: AppColors.neonLime, size: 13),
+                  SizedBox(width: 4),
+                  Text(
+                    '위치 갱신',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.neonLime,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 활성화된 하차 알람 카드 (네이버 지도 레이더 뷰 + 실시간 남은 거리 표시)
   Widget _buildActiveAlarmCard(
-      BuildContext context, WidgetRef ref, TransitAlarmItem alarm) {
+    BuildContext context,
+    WidgetRef ref,
+    TransitAlarmItem alarm,
+    double? distance,
+    UserLocationState locState,
+  ) {
     final pos = NLatLng(alarm.targetLatitude, alarm.targetLongitude);
+    final userPos = locState.position;
+
+    String distanceLabel;
+    bool isInsideRadius = false;
+
+    if (distance != null) {
+      isInsideRadius = distance <= alarm.radiusMeters;
+      if (distance >= 1000) {
+        distanceLabel = '${(distance / 1000).toStringAsFixed(1)}km 남음';
+      } else {
+        distanceLabel = '${distance.toInt()}m 남음';
+      }
+    } else {
+      distanceLabel = '거리 계산 중...';
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -154,14 +266,18 @@ class TransitAlarmScreen extends ConsumerWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-            color: AppColors.neonLime.withValues(alpha: 0.5), width: 1.2),
+          color: isInsideRadius
+              ? AppColors.urgentWarning
+              : AppColors.neonLime.withValues(alpha: 0.5),
+          width: isInsideRadius ? 2.0 : 1.2,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 상단: 스위치 + 핀 아이콘 + 타이틀 + 주소 + 더보기
+          // 상단: 스위치 + 핀 아이콘 + 타이틀 + 남은 거리 뱃지 + 더보기
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
             child: Row(
               children: [
                 Switch(
@@ -170,33 +286,87 @@ class TransitAlarmScreen extends ConsumerWidget {
                     ref.read(alarmProvider.notifier).toggleAlarm(alarm.id, val);
                   },
                 ),
-                const SizedBox(width: 10),
-                const Icon(Icons.push_pin,
-                    color: AppColors.neonLime, size: 18),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        alarm.title,
-                        style: const TextStyle(
-                          fontSize: 16.5,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              alarm.title,
+                              style: const TextStyle(
+                                fontSize: 16.5,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          // 실시간 거리 뱃지
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 9, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isInsideRadius
+                                  ? AppColors.urgentWarning.withValues(alpha: 0.2)
+                                  : AppColors.neonLime.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isInsideRadius
+                                    ? AppColors.urgentWarning
+                                    : AppColors.neonLime,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isInsideRadius
+                                      ? Icons.warning_amber_rounded
+                                      : Icons.navigation_rounded,
+                                  color: isInsideRadius
+                                      ? AppColors.urgentWarning
+                                      : AppColors.neonLime,
+                                  size: 13,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  isInsideRadius ? '곧 하차!' : distanceLabel,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w900,
+                                    color: isInsideRadius
+                                        ? AppColors.urgentWarning
+                                        : AppColors.neonLime,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        alarm.targetStationName,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.place,
+                              color: AppColors.textSecondary, size: 14),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              alarm.targetStationName,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -248,7 +418,17 @@ class TransitAlarmScreen extends ConsumerWidget {
                       outlineColor: AppColors.neonLime,
                       outlineWidth: 2,
                     );
-                    controller.addOverlayAll({marker, circle});
+
+                    controller.addOverlayAll({
+                      marker,
+                      circle,
+                      if (userPos != null)
+                        NMarker(
+                          id: 'user_pos_marker_${alarm.id}',
+                          position:
+                              NLatLng(userPos.latitude, userPos.longitude),
+                        ),
+                    });
                   },
                 ),
                 // 좌상단 반경 뱃지 pill (`((•)) 반경 1km`)
@@ -270,7 +450,7 @@ class TransitAlarmScreen extends ConsumerWidget {
                             color: AppColors.neonLime, size: 14),
                         const SizedBox(width: 5),
                         Text(
-                          '반경 ${(alarm.radiusMeters / 1000).toStringAsFixed(1)}km',
+                          '반경 ${(alarm.radiusMeters / 1000).toStringAsFixed(1)}km 알림',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,

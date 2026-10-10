@@ -17,6 +17,32 @@
 
 ## 📅 일자별 개발 일지
 
+### 🗓️ 2026-10-10 - 3번 탭 지도 UX 전면 개편 & 실시간 GPS 수신 및 자동 하차 알람 고도화
+
+#### 💬 주요 논의 및 기획 의사결정
+1. **장소/도로명 자유 검색 및 지도 중심 알람 설정 UX 개편**
+   - 기존의 "정류장/역"에 한정된 알람 설정 한계를 극복하고, 지하철, 택시, 카풀, 도보 등 범용 목적지에서도 자유롭게 활용할 수 있도록 개선.
+   - 좁은 고정 맵 뷰에서 벗어나 **풀스크린 네이버 지도 + 상단 플로팅 검색창(장소, 지명, 역, 도로명, 빌딩 검색)** 구조로 전면 전환.
+   - OSM Nominatim 및 주요 거점 캐시를 연동하여 빠른 자동완성 검색 및 카메라 부드러운 이동 지원.
+   - 지도 자유 터치 시 원하는 지점에 즉시 핀을 꽂고 역 지오코딩으로 주소/장소명을 자동 완성.
+   - 드래그 가능한 하단 설정 시트를 통해 알람 별칭, 반경 슬라이더(300m~2,000m), 소리/진동 옵션을 손쉽게 설정.
+2. **실시간 GPS 수신 및 지오펜싱 거리 계산 파이프라인 구축**
+   - `LocationService`를 신규 구축하여 iOS/Android 위치 권한 체크 및 실시간 위치 스트림(`getPositionStream`) 연동.
+   - 사용자의 현재 GPS 좌표와 등록된 활성 목적지 간 직선 거리(`Geolocator.distanceBetween`)를 실시간 연산.
+   - 3번 탭 상단에 실시간 GPS 연결 상태 바(인디케이터) 및 수동 갱신 버튼 제공.
+   - 동작 중인 하차 알람 카드에 목적지까지의 **실시간 남은 거리 뱃지(`▲ 1.4km 남음` / `🚨 곧 하차!`)** 동적 렌더링.
+   - 목적지 반경 이내 진입 시 로컬 푸시 알림 + 긴급 진동 알람 자동 트리거 로직 구현.
+
+#### 🛠️ 작업 내용
+- [x] [`location_service.dart`](file:///Users/tlskals/ProjectW/lib/core/services/location_service.dart): 실시간 GPS 수신, 거리 계산, 장소/도로명 검색 및 역 지오코딩 서비스 신규 구현
+- [x] [`transit_alarm_item.dart`](file:///Users/tlskals/ProjectW/lib/data/models/transit_alarm_item.dart): 범용 목적지 대응을 위한 `targetAddress` 필드 추가 및 직렬화 하위 호환성 유지
+- [x] [`alarm_provider.dart`](file:///Users/tlskals/ProjectW/lib/presentation/providers/alarm_provider.dart): `userLocationProvider`, `alarmDistancesProvider`, 실시간 지오펜싱 진입 감지 로직 적용
+- [x] [`set_alarm_map_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/set_alarm_map_screen.dart): 풀스크린 네이버 지도, 플로팅 장소 검색창, 터치 핀 지정, GPS 바로가기, 드래그 설정 시트 구현
+- [x] [`transit_alarm_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/transit_alarm_screen.dart): 실시간 GPS 연결 상태 바, 실시간 남은 거리 동적 뱃지, 레이더 지도 뷰 연동
+- [x] 정적 분석(`flutter analyze` No issues) 및 테스트 100% 통과 검증 완료
+
+---
+
 ### 🗓️ 2026-10-09 - 네이버 지도 SDK 연동 및 스마트 하차 알람(3번 탭) 지도 레이더 뷰 구축
 
 #### 💬 주요 논의 및 기획 의사결정

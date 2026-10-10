@@ -5,6 +5,7 @@ class TransitAlarmItem {
   final String id;
   final String title; // 예: "퇴근길 판교역 하차", "우리집 앞 정류장"
   final String targetStationName; // 목적지 정류장/역 이름
+  final String? targetAddress; // 목적지 상세 주소/도로명 (선택)
   final double targetLatitude; // 목적지 위도
   final double targetLongitude; // 목적지 경도
   final double radiusMeters; // 알람 발동 반경 (기본 500m ~ 1500m)
@@ -18,6 +19,7 @@ class TransitAlarmItem {
     required this.id,
     required this.title,
     required this.targetStationName,
+    this.targetAddress,
     required this.targetLatitude,
     required this.targetLongitude,
     this.radiusMeters = 700.0,
@@ -32,6 +34,7 @@ class TransitAlarmItem {
     String? id,
     String? title,
     String? targetStationName,
+    String? targetAddress,
     double? targetLatitude,
     double? targetLongitude,
     double? radiusMeters,
@@ -45,6 +48,7 @@ class TransitAlarmItem {
       id: id ?? this.id,
       title: title ?? this.title,
       targetStationName: targetStationName ?? this.targetStationName,
+      targetAddress: targetAddress ?? this.targetAddress,
       targetLatitude: targetLatitude ?? this.targetLatitude,
       targetLongitude: targetLongitude ?? this.targetLongitude,
       radiusMeters: radiusMeters ?? this.radiusMeters,
@@ -61,6 +65,7 @@ class TransitAlarmItem {
       'id': id,
       'title': title,
       'targetStationName': targetStationName,
+      'targetAddress': targetAddress,
       'targetLatitude': targetLatitude,
       'targetLongitude': targetLongitude,
       'radiusMeters': radiusMeters,
@@ -77,6 +82,7 @@ class TransitAlarmItem {
       id: map['id'] ?? '',
       title: map['title'] ?? '',
       targetStationName: map['targetStationName'] ?? '',
+      targetAddress: map['targetAddress'],
       targetLatitude: (map['targetLatitude'] as num?)?.toDouble() ?? 0.0,
       targetLongitude: (map['targetLongitude'] as num?)?.toDouble() ?? 0.0,
       radiusMeters: (map['radiusMeters'] as num?)?.toDouble() ?? 700.0,

@@ -166,6 +166,7 @@ class BusDashboardScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'bus_tab_fab',
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const AddBusRouteScreen()),
