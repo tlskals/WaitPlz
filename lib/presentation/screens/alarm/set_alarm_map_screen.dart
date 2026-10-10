@@ -7,6 +7,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/services/location_service.dart';
 import '../../../data/models/transit_alarm_item.dart';
 import '../../providers/alarm_provider.dart';
+import '../../providers/settings_provider.dart';
 
 /// 장소/도로명 자유 검색 및 핀 위치 지정 스마트 하차 알람 설정 화면
 class SetAlarmMapScreen extends ConsumerStatefulWidget {
@@ -41,6 +42,10 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
   @override
   void initState() {
     super.initState();
+    final settings = ref.read(settingsProvider);
+    _radiusMeters = settings.defaultRadiusMeters;
+    _soundEnabled = settings.defaultSoundEnabled;
+    _vibrationEnabled = settings.defaultVibrationEnabled;
     _titleController.text = '테헤란로 도착 알람';
     _stationController.text = '테헤란로';
 

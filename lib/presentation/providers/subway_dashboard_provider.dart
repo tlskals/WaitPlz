@@ -4,6 +4,7 @@ import '../../core/services/local_storage_service.dart';
 import '../../data/models/subway_arrival_info.dart';
 import '../../data/repositories/subway_repository.dart';
 import 'bus_dashboard_provider.dart';
+import 'settings_provider.dart';
 
 final subwayRepositoryProvider = Provider<SubwayRepository>((ref) {
   return SubwayRepository();
@@ -55,10 +56,15 @@ class SubwayDashboardNotifier extends Notifier<SubwayDashboardState> {
       _autoRefreshTimer?.cancel();
     });
 
+    final refreshSeconds =
+        ref.watch(settingsProvider.select((s) => s.refreshIntervalSeconds));
     _autoRefreshTimer?.cancel();
-    _autoRefreshTimer = Timer.periodic(const Duration(seconds: 15), (_) {
-      refreshArrivalsOnly();
-    });
+    if (refreshSeconds > 0) {
+      _autoRefreshTimer =
+          Timer.periodic(Duration(seconds: refreshSeconds), (_) {
+        refreshArrivalsOnly();
+      });
+    }
 
     Future.microtask(() => loadDashboardData());
     return SubwayDashboardState(lastUpdated: DateTime.now());

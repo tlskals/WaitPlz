@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:vibration/vibration.dart';
+import '../../data/models/app_settings.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -28,40 +29,57 @@ class NotificationService {
     );
   }
 
-  /// "기사님, 잠시만요!" 도착 전 강력 하차 알람 발송
+  /// 진동 세기 테스트 (미리보기)
+  Future<void> testVibration(VibrationIntensity intensity) async {
+    final hasVibrator = await Vibration.hasVibrator();
+    if (hasVibrator == true) {
+      await Vibration.cancel();
+      await Vibration.vibrate(
+        pattern: intensity.pattern,
+        intensities: intensity.intensities,
+      );
+    }
+  }
+
+  /// "기사님, 잠시만요!" 도착 전 하차 알람 발송
   Future<void> triggerGetOffAlarm({
     required String stationName,
     String? busRouteName,
+    VibrationIntensity vibrationIntensity = VibrationIntensity.strong,
+    bool soundEnabled = true,
+    bool vibrationEnabled = true,
   }) async {
-    // 1. 강력한 진동 패턴 발생 (잠든 사람 깨우기용 긴 진동)
-    final hasVibrator = await Vibration.hasVibrator();
-    if (hasVibrator == true) {
-      Vibration.vibrate(
-        pattern: [500, 1000, 500, 1000, 500, 2000],
-        intensities: [128, 255, 128, 255, 128, 255],
-      );
+    // 1. 설정된 진동 모드 발생
+    if (vibrationEnabled) {
+      final hasVibrator = await Vibration.hasVibrator();
+      if (hasVibrator == true) {
+        await Vibration.cancel();
+        await Vibration.vibrate(
+          pattern: vibrationIntensity.pattern,
+          intensities: vibrationIntensity.intensities,
+        );
+      }
     }
 
-    // 2. 포그라운드/백그라운드 헤드업 알림 띄우기
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'transit_get_off_alarm_channel',
       '하차 알람 (기사님, 잠시만요!)',
       channelDescription: '목적지 도착 전 잠을 깨워주는 긴급 알람',
       importance: Importance.max,
       priority: Priority.high,
       fullScreenIntent: true,
-      enableVibration: true,
-      playSound: true,
+      enableVibration: vibrationEnabled,
+      playSound: soundEnabled,
     );
 
-    const iosDetails = DarwinNotificationDetails(
+    final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
-      presentSound: true,
+      presentSound: soundEnabled,
       interruptionLevel: InterruptionLevel.timeSensitive,
     );
 
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );

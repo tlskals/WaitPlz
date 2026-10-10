@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../data/models/app_settings.dart';
 import '../../data/models/favorite_route.dart';
 import '../../data/models/transit_alarm_item.dart';
 
@@ -6,6 +7,7 @@ class LocalStorageService {
   static const String _keyFavoriteRoutes = 'favorite_routes_v2';
   static const String _keyTransitAlarms = 'transit_alarms_v1';
   static const String _keyFavoriteSubwayStations = 'favorite_subway_stations_v1';
+  static const String _keyAppSettings = 'app_settings_v1';
 
   final SharedPreferences _prefs;
 
@@ -192,5 +194,31 @@ class LocalStorageService {
   Future<void> deleteTransitAlarm(String id) async {
     final alarms = getTransitAlarms()..removeWhere((e) => e.id == id);
     await saveTransitAlarms(alarms);
+  }
+
+  // --- 앱 환경설정 관리 ---
+  AppSettings getSettings() {
+    final jsonStr = _prefs.getString(_keyAppSettings);
+    if (jsonStr == null) {
+      return const AppSettings();
+    }
+    try {
+      return AppSettings.fromJson(jsonStr);
+    } catch (_) {
+      return const AppSettings();
+    }
+  }
+
+  Future<void> saveSettings(AppSettings settings) async {
+    await _prefs.setString(_keyAppSettings, settings.toJson());
+  }
+
+  /// 전체 데이터 초기화 및 기본 직장인 샘플 데이터 복원
+  Future<void> resetToDefaultData() async {
+    await _prefs.remove(_keyFavoriteRoutes);
+    await _prefs.remove(_keyTransitAlarms);
+    await _prefs.remove(_keyFavoriteSubwayStations);
+    await _prefs.remove(_keyAppSettings);
+    await _initSampleDataIfEmpty();
   }
 }

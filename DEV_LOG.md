@@ -17,6 +17,44 @@
 
 ## 📅 일자별 개발 일지
 
+### 🗓️ 2026-10-10 (추가 2) - 4번 탭 환경설정 전면 개편: 반응형 진동 세기 선택 및 즉시 체감 테스트 & 전역 설정 센터 구축
+
+#### 💬 주요 논의 및 기획 의사결정
+1. **진동 알람 세기 3단계 설정 및 즉시 체감 테스트 (`VibrationIntensity`)**
+   - 사용자가 자신의 수면 습관이나 이용 환경(도서관, 장거리 통근)에 맞춰 진동 세기를 선택할 수 있도록 3단계 모드 제공:
+     - **약함**: 부드러운 햅틱 (도서관·조용한 장소용)
+     - **보통**: 일반 알람 진동 (표준 진동 패턴)
+     - **강력 진동 (추천)**: 잠든 사람 깨우기 모드 (연속 롱 진동 + 강한 햅틱)
+   - 모달 바텀 시트 및 항목 우측의 `[▶️ 테스트]` 버튼을 통해 실제 스마트폰 진동 모터를 즉시 울려 강도를 직접 체감할 수 있는 인터랙티브 UX 구현.
+   - 3번 탭 하차 알람 트리거 시 선택된 진동 세기가 자동 반영되도록 파이프라인 연동.
+2. **하차 알람 기본 환경설정 (기본 반경 & 소리/진동 기본값)**
+   - 새 알람 등록 시 적용될 기본 하차 알람 반경(300m, 500m, 800m, 1,000m, 1,500m, 2,000m) 바텀시트 선택 제공.
+   - 신규 알람 등록 화면([`set_alarm_map_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/set_alarm_map_screen.dart)) 진입 시 사용자가 설정한 기본 반경과 소리/진동 옵션이 자동으로 초기값 세팅되도록 연동.
+3. **GPS 위치 권한 상태 센터 & 시스템 설정 원터치 이동**
+   - 현재 위치 권한(항상 허용 / 앱 사용 중에만 허용 / 거부) 상태를 실시간 감지하여 상태 뱃지(`정상` / `설정 권장`)로 시각화.
+   - 화면 꺼짐 시에도 안정적으로 알람을 수신하기 위한 '항상 허용' 권장 안내 및 `Geolocator.openAppSettings()`를 통한 시스템 설정 바로가기 제공.
+   - 백그라운드 배터리 절전 모드 예외 설정 가이드 모달 제공.
+4. **실시간 도착 정보 갱신 주기 동적 조절 & 데이터 초기화/샘플 복원**
+   - 버스/지하철 실시간 도착 자동 새로고침 간격(10초, 15초(기본), 30초, 수동만) 선택 지원.
+   - 설정 변경 즉시 1번 탭([`bus_dashboard_provider.dart`](file:///Users/tlskals/ProjectW/lib/presentation/providers/bus_dashboard_provider.dart))과 2번 탭([`subway_dashboard_provider.dart`](file:///Users/tlskals/ProjectW/lib/presentation/providers/subway_dashboard_provider.dart))의 자동 갱신 타이머가 재스케줄링되는 반응형 아키텍처 구축.
+   - 확인 팝업을 거쳐 등록된 모든 즐겨찾기 버스·지하철 및 하차 알람을 초기 상태로 복원하는 '데이터 초기화 & 샘플 복원' 기능 구현.
+5. **공공데이터 & 네이버 지도 상업적 이용 라이선스 투명 고지**
+   - 공공누리 제1유형(출처표시) 국토교통부, 서울시 TOPIS, 코레일 데이터 출처 및 상업적 무료 이용 근거 상세 모달 제공.
+   - NAVER Cloud Platform Mobile Dynamic Map SDK 월 300만 건 무료 쿼터 및 저작권 명시.
+   - Flutter 공식 `showLicensePage` 오픈소스 소프트웨어 라이선스 연결.
+
+#### 🛠️ 작업 내용
+- [x] [`app_settings.dart`](file:///Users/tlskals/ProjectW/lib/data/models/app_settings.dart): `VibrationIntensity` enum 및 `AppSettings` 모델 신규 구현
+- [x] [`local_storage_service.dart`](file:///Users/tlskals/ProjectW/lib/core/services/local_storage_service.dart): `AppSettings` 저장/불러오기 및 `resetToDefaultData` 전체 초기화 메서드 추가
+- [x] [`notification_service.dart`](file:///Users/tlskals/ProjectW/lib/core/services/notification_service.dart): 진동 세기별 패턴 분기 및 `testVibration()` 즉시 테스트 메서드 구현
+- [x] [`settings_provider.dart`](file:///Users/tlskals/ProjectW/lib/presentation/providers/settings_provider.dart): Riverpod 3.x Notifier 기반 전역 반응형 설정 관리자 신규 구축
+- [x] [`set_alarm_map_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/set_alarm_map_screen.dart): 4번 탭에서 설정한 기본 반경 및 소리/진동 기본값이 신규 알람 등록 시 자동 반영되도록 연동
+- [x] [`bus_dashboard_provider.dart`](file:///Users/tlskals/ProjectW/lib/presentation/providers/bus_dashboard_provider.dart) & [`subway_dashboard_provider.dart`](file:///Users/tlskals/ProjectW/lib/presentation/providers/subway_dashboard_provider.dart): 설정된 갱신 주기에 맞춰 타이머 동적 스케줄링 적용
+- [x] [`settings_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/settings/settings_screen.dart): 다크 테마 + 네온 라임 디자인 기반 전면 고도화 (프로필 카드, 진동 바텀시트, 반경 바텀시트, 위치 권한 모달, 라이선스 모달)
+- [x] 정적 분석(`flutter analyze` No issues) 및 `flutter test` 100% 통과 검증 완료
+
+---
+
 ### 🗓️ 2026-10-10 - 3번 탭 지도 UX 전면 개편 & 실시간 GPS 수신 및 자동 하차 알람 고도화
 
 #### 💬 주요 논의 및 기획 의사결정

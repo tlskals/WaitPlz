@@ -6,6 +6,7 @@ import '../../core/services/location_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../data/models/transit_alarm_item.dart';
 import 'bus_dashboard_provider.dart';
+import 'settings_provider.dart';
 
 final locationServiceProvider = Provider<LocationService>((ref) {
   return LocationService();
@@ -175,9 +176,11 @@ class AlarmNotifier extends Notifier<List<TransitAlarmItem>> {
       if (distance <= alarm.radiusMeters) {
         if (!_triggeredAlarmIds.contains(alarm.id)) {
           _triggeredAlarmIds.add(alarm.id);
+          final settings = ref.read(settingsProvider);
           _notificationService.triggerGetOffAlarm(
             stationName: alarm.targetStationName,
             busRouteName: alarm.busRouteName,
+            vibrationIntensity: settings.vibrationIntensity,
           );
         }
       } else if (distance > alarm.radiusMeters * 1.5) {
@@ -189,9 +192,11 @@ class AlarmNotifier extends Notifier<List<TransitAlarmItem>> {
 
   /// 테스트 알람 울리기 (실제 진동 및 헤드업 푸시 알림 발송)
   Future<void> testAlarm(TransitAlarmItem alarm) async {
+    final settings = ref.read(settingsProvider);
     await _notificationService.triggerGetOffAlarm(
       stationName: alarm.targetStationName,
       busRouteName: alarm.busRouteName,
+      vibrationIntensity: settings.vibrationIntensity,
     );
   }
 }

@@ -4,6 +4,7 @@ import '../../core/services/local_storage_service.dart';
 import '../../data/models/bus_arrival_info.dart';
 import '../../data/models/favorite_route.dart';
 import '../../data/repositories/bus_repository.dart';
+import 'settings_provider.dart';
 
 final localStorageServiceProvider = Provider<LocalStorageService>((ref) {
   throw UnimplementedError('LocalStorageService must be initialized in main()');
@@ -59,10 +60,15 @@ class BusDashboardNotifier extends Notifier<BusDashboardState> {
       _autoRefreshTimer?.cancel();
     });
 
+    final refreshSeconds =
+        ref.watch(settingsProvider.select((s) => s.refreshIntervalSeconds));
     _autoRefreshTimer?.cancel();
-    _autoRefreshTimer = Timer.periodic(const Duration(seconds: 15), (_) {
-      refreshArrivalsOnly();
-    });
+    if (refreshSeconds > 0) {
+      _autoRefreshTimer =
+          Timer.periodic(Duration(seconds: refreshSeconds), (_) {
+        refreshArrivalsOnly();
+      });
+    }
 
     Future.microtask(() => loadDashboardData());
     return BusDashboardState(lastUpdated: DateTime.now());
