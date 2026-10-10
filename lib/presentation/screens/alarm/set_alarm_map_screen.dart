@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -780,12 +781,13 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                                     ],
                                   ),
                                   Transform.scale(
-                                    scale: 0.8,
-                                    child: Switch(
+                                    scale: 0.75,
+                                    child: CupertinoSwitch(
                                       value: _soundEnabled,
                                       onChanged: (v) => setState(() => _soundEnabled = v),
-                                      activeThumbColor: AppColors.neonLime,
-                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      activeTrackColor: AppColors.neonLime,
+                                      inactiveTrackColor: const Color(0xFF39393D),
+                                      thumbColor: Colors.white,
                                     ),
                                   ),
                                 ],
@@ -833,12 +835,13 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                                     ],
                                   ),
                                   Transform.scale(
-                                    scale: 0.8,
-                                    child: Switch(
+                                    scale: 0.75,
+                                    child: CupertinoSwitch(
                                       value: _vibrationEnabled,
                                       onChanged: (v) => setState(() => _vibrationEnabled = v),
-                                      activeThumbColor: AppColors.neonLime,
-                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      activeTrackColor: AppColors.neonLime,
+                                      inactiveTrackColor: const Color(0xFF39393D),
+                                      thumbColor: Colors.white,
                                     ),
                                   ),
                                 ],

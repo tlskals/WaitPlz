@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -280,11 +281,17 @@ class TransitAlarmScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
             child: Row(
               children: [
-                Switch(
-                  value: alarm.isEnabled,
-                  onChanged: (val) {
-                    ref.read(alarmProvider.notifier).toggleAlarm(alarm.id, val);
-                  },
+                Transform.scale(
+                  scale: 0.85,
+                  child: CupertinoSwitch(
+                    value: alarm.isEnabled,
+                    activeTrackColor: AppColors.neonLime,
+                    inactiveTrackColor: const Color(0xFF39393D),
+                    thumbColor: Colors.white,
+                    onChanged: (val) {
+                      ref.read(alarmProvider.notifier).toggleAlarm(alarm.id, val);
+                    },
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -523,11 +530,17 @@ class TransitAlarmScreen extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Switch(
-            value: alarm.isEnabled,
-            onChanged: (val) {
-              ref.read(alarmProvider.notifier).toggleAlarm(alarm.id, val);
-            },
+          Transform.scale(
+            scale: 0.85,
+            child: CupertinoSwitch(
+              value: alarm.isEnabled,
+              activeTrackColor: AppColors.neonLime,
+              inactiveTrackColor: const Color(0xFF39393D),
+              thumbColor: Colors.white,
+              onChanged: (val) {
+                ref.read(alarmProvider.notifier).toggleAlarm(alarm.id, val);
+              },
+            ),
           ),
           const SizedBox(width: 12),
           const Icon(Icons.push_pin_outlined,

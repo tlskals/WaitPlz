@@ -42,6 +42,7 @@
 - [x] 버튼 내부 폰트 렌더링 최적화: 버튼 내부 상하 패딩 리셋(`EdgeInsets.zero`) 및 이모지 베이스라인 밀림 방지를 위한 Material Icon 분리 배치로 자음/받침 잘림 100% 해소
 - [x] [`transit_alarm_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/transit_alarm_screen.dart): 실시간 GPS 연결 상태 바, 실시간 남은 거리 동적 뱃지, 레이더 지도 뷰 연동
 - [x] 하차 알람 설정 바텀 시트 소리/진동 토글 UX 개선: 한 줄에 붙어 혼동을 주던 구조를 독립된 2개 카드 컨테이너(`[ 🔊 소리  (토글) ]` / `[ 📳 진동  (토글) ]`)로 완벽 분리하고, 4번 탭 진동 세기 설정과의 일관성을 위해 '강력 진동' 명칭을 '진동'으로 직관화
+- [x] 토글 스위치 렌더링 시인성 결함 전면 해소: Material 3 Switch의 다크 테마 결함(OFF 시 트랙이 사라져 흰 점만 보이고, ON 시 흰 공이 사라져 연두색 덩어리만 보이는 현상)을 해결하기 위해, ON/OFF 상관없이 항상 외곽 알약 트랙(다크 그레이 / 네온 라임)이 유지되고 내부에서 흰 공(White Thumb)이 부드럽게 이동하는 `CupertinoSwitch`로 전면 교체 (`set_alarm_map_screen.dart`, `transit_alarm_screen.dart`)
 - [x] 정적 분석(`flutter analyze` No issues) 및 테스트 100% 통과 검증 완료
 
 ---
