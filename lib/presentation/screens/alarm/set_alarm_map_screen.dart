@@ -773,19 +773,35 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                     // 저장 버튼
                     SizedBox(
                       width: double.infinity,
-                      height: 50,
+                      height: 54,
                       child: ElevatedButton(
                         onPressed: _saveAlarm,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.neonLime,
                           foregroundColor: Colors.black,
+                          elevation: 0,
+                          padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Text('🔔 이 위치로 하차 알람 설정 완료',
-                            style: TextStyle(
-                                fontSize: 15.5, fontWeight: FontWeight.w900)),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.notifications_active,
+                                color: Colors.black, size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              '이 위치로 하차 알람 설정 완료',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                height: 1.2,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
