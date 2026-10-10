@@ -121,9 +121,9 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
         ? downList.first.heading
         : '하행 / 외선 방면';
 
-    // 접힘/펼침 상태에 따른 노출 열차 개수 제어
-    final visibleUpList = _isExpanded ? upList : upList.take(2).toList();
-    final visibleDownList = _isExpanded ? downList : downList.take(2).toList();
+    // 접힘/펼침 상태에 따른 노출 열차 개수 제어 (접혔을 때는 최신 1개만, 펼쳤을 때는 전체)
+    final visibleUpList = _isExpanded ? upList : upList.take(1).toList();
+    final visibleDownList = _isExpanded ? downList : downList.take(1).toList();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -319,7 +319,7 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
                 item.status.contains('도착');
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: EdgeInsets.only(bottom: _isExpanded ? 8 : 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
