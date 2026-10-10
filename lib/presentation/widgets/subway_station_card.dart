@@ -45,15 +45,85 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
     return lines;
   }
 
+  /// 도착 정보 문자열을 상/하행, 방면, 행선지, 상태로 정밀 파싱
+  List<_ParsedArrivalItem> _parseArrivals() {
+    final list = <_ParsedArrivalItem>[];
+
+    for (int i = 0; i < widget.arrivals.length; i++) {
+      final a = widget.arrivals[i];
+      final raw = a.direction;
+
+      // 1. 상행(내선) vs 하행(외선) 판별
+      bool isUp;
+      if (raw.contains('상행') || raw.contains('내선')) {
+        isUp = true;
+      } else if (raw.contains('하행') || raw.contains('외선')) {
+        isUp = false;
+      } else {
+        // 태그가 없는 경우 번갈아가며 분리
+        isUp = (i % 2 == 0);
+      }
+
+      // 2. 태그 제거 및 행선지, 방면 분리
+      // 예: "[상행] 광운대행 - 금천구청방면행" -> destination: "광운대행", heading: "금천구청방면"
+      String clean = raw
+          .replaceAll('[상행]', '')
+          .replaceAll('[하행]', '')
+          .replaceAll('[내선]', '')
+          .replaceAll('[외선]', '')
+          .trim();
+
+      String destination = clean;
+      String heading = isUp ? '상행 방면' : '하행 방면';
+
+      if (clean.contains('-')) {
+        final parts = clean.split('-');
+        destination = parts[0].trim();
+        String h = parts[1].trim();
+        h = h.replaceAll('방면행', ' 방면').replaceAll('방면', ' 방면').trim();
+        heading = h;
+      } else if (clean.contains('방면')) {
+        heading = clean;
+      }
+
+      // 3. 도착 상태 메시지
+      String status = a.arrivalMessage.isNotEmpty
+          ? a.arrivalMessage
+          : a.arrivalTimeText;
+
+      list.add(_ParsedArrivalItem(
+        lineName: a.lineName,
+        destination: destination,
+        heading: heading,
+        status: status,
+        isUp: isUp,
+      ));
+    }
+
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
     final displayName = widget.stationName.endsWith('역')
         ? widget.stationName
         : '${widget.stationName}역';
 
-    // 대표 상/하행 도착 정보 분리
-    final firstArrival = widget.arrivals.isNotEmpty ? widget.arrivals[0] : null;
-    final secondArrival = widget.arrivals.length > 1 ? widget.arrivals[1] : null;
+    final parsedList = _parseArrivals();
+    final upList = parsedList.where((p) => p.isUp).toList();
+    final downList = parsedList.where((p) => !p.isUp).toList();
+
+    // 상/하행 대표 방면 타이틀
+    final upHeadingTitle = upList.isNotEmpty
+        ? upList.first.heading
+        : '상행 / 내선 방면';
+    final downHeadingTitle = downList.isNotEmpty
+        ? downList.first.heading
+        : '하행 / 외선 방면';
+
+    // 접힘/펼침 상태에 따른 노출 열차 개수 제어
+    final visibleUpList = _isExpanded ? upList : upList.take(2).toList();
+    final visibleDownList = _isExpanded ? downList : downList.take(2).toList();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -82,7 +152,6 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
               // 1. 헤더: [호선 뱃지들] + [역 이름] + [별 즐겨찾기 버튼] + [접힘/펼침]
               Row(
                 children: [
-                  // 호선 뱃지들
                   Row(
                     children: _distinctLines.take(3).map((line) {
                       return Container(
@@ -106,7 +175,6 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
                     }).toList(),
                   ),
                   const SizedBox(width: 4),
-                  // 역 이름
                   Expanded(
                     child: Text(
                       displayName,
@@ -120,7 +188,7 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
                     ),
                   ),
 
-                  // 즐겨찾기 별 버튼 (★ 누르면 즐겨찾기 해제)
+                  // 즐겨찾기 별 버튼 (★)
                   IconButton(
                     icon: const Icon(Icons.star,
                         color: AppColors.neonLime, size: 24),
@@ -139,10 +207,10 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
-              // 2. 카드 본문: 도착 정보 (1번 탭 버스 스타일 2열 그리드)
-              if (widget.arrivals.isEmpty)
+              // 2. 카드 본문: 1번 탭 스타일 완벽한 좌/우 2열 분할 레이아웃
+              if (parsedList.isEmpty)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -155,94 +223,37 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
                     ),
                   ),
                 )
-              else if (!_isExpanded)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 첫 번째 방면 도착 정보
-                    Expanded(
-                      child: _buildArrivalColumn(
-                        arrival: firstArrival,
-                        fallbackLabel: '상행 / 내선',
-                      ),
-                    ),
-                    Container(
-                      width: 1,
-                      height: 50,
-                      margin: const EdgeInsets.symmetric(horizontal: 12),
-                      color: AppColors.cardBorder,
-                    ),
-                    // 두 번째 방면 도착 정보
-                    Expanded(
-                      child: _buildArrivalColumn(
-                        arrival: secondArrival,
-                        fallbackLabel: '하행 / 외선',
-                      ),
-                    ),
-                  ],
-                )
               else
-                // 펼쳤을 때: 모든 열차 도착 현황 전체 리스트
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Divider(color: AppColors.cardBorder, height: 16),
-                    ...widget.arrivals.map((item) {
-                      final lineColor = _getLineColor(item.lineName);
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: lineColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: lineColor.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                item.lineName,
-                                style: TextStyle(
-                                  color: lineColor,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                '${item.direction}행',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            Text(
-                              item.arrivalMessage,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.neonLime,
-                              ),
-                            ),
-                          ],
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ◀ 왼쪽: 상행 / 내선 열차 리스트
+                      Expanded(
+                        child: _buildDirectionColumn(
+                          headingTitle: upHeadingTitle,
+                          items: visibleUpList,
+                          fallbackText: '상행 운행 열차 없음',
                         ),
-                      );
-                    }),
-                  ],
+                      ),
+
+                      // 가운데 세로 구분선
+                      Container(
+                        width: 1,
+                        margin: const EdgeInsets.symmetric(horizontal: 12),
+                        color: AppColors.cardBorder,
+                      ),
+
+                      // ▶ 오른쪽: 하행 / 외선 열차 리스트
+                      Expanded(
+                        child: _buildDirectionColumn(
+                          headingTitle: downHeadingTitle,
+                          items: visibleDownList,
+                          fallbackText: '하행 운행 열차 없음',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
             ],
           ),
@@ -251,57 +262,16 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
     );
   }
 
-  /// 2열 분할 도착 정보 컬럼 빌더 (1번 탭 버스 스타일 일관성)
-  Widget _buildArrivalColumn({
-    required SubwayArrivalInfo? arrival,
-    required String fallbackLabel,
+  /// 좌/우 방면별 열차 컬럼 빌더 (상단 방면명 헤더 + 열차 행선지 및 도착 상태 리스트)
+  Widget _buildDirectionColumn({
+    required String headingTitle,
+    required List<_ParsedArrivalItem> items,
+    required String fallbackText,
   }) {
-    if (arrival == null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  color: AppColors.textMuted,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                fallbackLabel,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textMuted,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            '도착 정보 없음',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textMuted,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      );
-    }
-
-    final isSoon = arrival.arrivalMessage.contains('곧') ||
-        arrival.arrivalMessage.contains('진입') ||
-        arrival.arrivalMessage.contains('도착');
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 방향 안내
+        // 상단 방면명 헤더 (예: "금천구청 방면" | "관악 방면")
         Row(
           children: [
             Container(
@@ -315,11 +285,12 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                arrival.direction,
+                headingTitle,
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 13,
                   color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -327,36 +298,79 @@ class _SubwayStationCardState extends State<SubwayStationCard> {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
 
-        // 도착 시간 / 상태 (예: 3분 2번째 전역 or 곧 도착)
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: isSoon ? '곧 도착 ' : arrival.arrivalTimeText,
-                style: TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                  color: isSoon ? AppColors.urgentWarning : AppColors.neonLime,
-                  letterSpacing: -0.5,
-                ),
+        if (items.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Text(
+              fallbackText,
+              style: const TextStyle(
+                fontSize: 12.5,
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.w500,
               ),
-              if (!isSoon && arrival.arrivalMessage.isNotEmpty)
-                TextSpan(
-                  text: ' ${arrival.arrivalMessage.replaceAll(arrival.arrivalTimeText, '').trim()}',
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+            ),
+          )
+        else
+          ...items.map((item) {
+            final isUrgent = item.status.contains('곧') ||
+                item.status.contains('진입') ||
+                item.status.contains('도착');
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1행: 행선지 (예: "광운대행", "청량리행")
+                  Text(
+                    item.destination,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-            ],
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+                  const SizedBox(height: 2),
+                  // 2행: 도착 상태 (예: "2번째 전역 (안양)", "전역 도착")
+                  Text(
+                    item.status,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: isUrgent
+                          ? AppColors.urgentWarning
+                          : AppColors.neonLime,
+                      letterSpacing: -0.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            );
+          }),
       ],
     );
   }
+}
+
+class _ParsedArrivalItem {
+  final String lineName;
+  final String destination;
+  final String heading;
+  final String status;
+  final bool isUp;
+
+  _ParsedArrivalItem({
+    required this.lineName,
+    required this.destination,
+    required this.heading,
+    required this.status,
+    required this.isUp,
+  });
 }

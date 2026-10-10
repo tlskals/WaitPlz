@@ -55,17 +55,18 @@
 2. **별도 등록 버튼 없이 검색창에서 별(★) 클릭 한 번으로 즐겨찾기 추가/해제**
    - 불필요한 등록 버튼이나 화면 이동을 완전히 배제하고, 상단 역 검색창에서 역 이름을 검색한 후 우측 **별(★ / ☆) 아이콘 버튼**을 누르면 즉시 즐겨찾기 추가/해제되는 직관적인 원클릭 UX 구현.
    - 수도권 주요 지하철역(100여 개 이상) 자동완성 및 직접 입력 역 즉시 대응.
-3. **1번 탭 버스 스타일과 동일한 `SubwayStationCard` 탑재**
-   - 소속 호선 뱃지(고유 색상) + 역 이름 + 별(★) 해제 버튼 + 펼침/접힘 화살표.
-   - 카드 접힘 상태: 1번 탭 버스처럼 상행/내선 및 하행/외선 실시간 도착 정보(예: `3분 후`, `곧 도착`) 2열 분할 그리드 표시.
-   - 카드 펼침 상태: 해당 역의 모든 호선/방면별 실시간 도착 목록 및 열차 위치 상세 표출.
+3. **상행/하행 완벽한 좌우 2열 분할 레이아웃 (`SubwayStationCard`)**
+   - 사용자 피드백 반영: 상행과 하행이 세로로 섞여 식별이 어려운 문제를 해결하기 위해, 접힘 및 펼침 상태 모두에서 **좌우 2열 분할(왼쪽: 상행/내선 방면 | 오른쪽: 하행/외선 방면)**로 완전히 분리.
+   - 상단 방면명 헤더: `● 금천구청 방면 | ● 관악 방면`처럼 분할 상단에 방면명을 굵게 명시.
+   - 열차 아이템: 1행에 행선지(예: `광운대행`, `신창행`), 2행에 도착 상태(예: `석수 도착`, `[3]번째 전역`)를 2줄 스택으로 배치하여 좁은 너비에서도 시인성 극대화.
+   - 카드 펼침 시에도 좌우 2열 분할 레이아웃을 그대로 유지하며 양쪽 방면의 전체 도착 열차가 깔끔하게 펼쳐지도록 최적화.
    - `SharedPreferences` 연동으로 앱 재실행 후에도 즐겨찾기 역 상태 영구 유지.
 
 #### 🛠️ 작업 내용
 - [x] [`local_storage_service.dart`](file:///Users/tlskals/ProjectW/lib/core/services/local_storage_service.dart): 지하철 즐겨찾기 역 저장, 복원 및 토글 메서드 추가
 - [x] [`subway_repository.dart`](file:///Users/tlskals/ProjectW/lib/data/repositories/subway_repository.dart): 여러 즐겨찾기 역의 도착 정보를 한 번에 병렬 조회하는 `fetchArrivalsForStations` 메서드 구현
 - [x] [`subway_dashboard_provider.dart`](file:///Users/tlskals/ProjectW/lib/presentation/providers/subway_dashboard_provider.dart): 즐겨찾기 역 목록 상태 관리 및 15초 주기 실시간 자동 갱신 Notifier 신규 구현
-- [x] [`subway_station_card.dart`](file:///Users/tlskals/ProjectW/lib/presentation/widgets/subway_station_card.dart): 1번 탭 버스 카드와 디자인이 일치하는 2열 분할 지하철 도착 카드 위젯 신규 구축
+- [x] [`subway_station_card.dart`](file:///Users/tlskals/ProjectW/lib/presentation/widgets/subway_station_card.dart): 상행/하행 완벽 좌우 2열 분할(방면명 헤더 + 행선지/도착상태 스택) 카드 위젯 신규 구축
 - [x] [`subway_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/subway/subway_screen.dart): 노선도 걷어내고 상단 별(★) 즉시 등록 검색창 + 메인 즐겨찾기 카드 리스트로 전면 리팩토링
 - [x] 사용하지 않는 `subway_map_viewer.dart`, `subway_graph_service.dart` 파일 정리 및 `flutter analyze` 0 issues 검증 완료
 
