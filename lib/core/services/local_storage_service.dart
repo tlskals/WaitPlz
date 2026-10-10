@@ -5,6 +5,7 @@ import '../../data/models/transit_alarm_item.dart';
 class LocalStorageService {
   static const String _keyFavoriteRoutes = 'favorite_routes_v2';
   static const String _keyTransitAlarms = 'transit_alarms_v1';
+  static const String _keyFavoriteSubwayStations = 'favorite_subway_stations_v1';
 
   final SharedPreferences _prefs;
 
@@ -96,6 +97,47 @@ class LocalStorageService {
       ];
       await saveTransitAlarms(defaultAlarms);
     }
+
+    if (!_prefs.containsKey(_keyFavoriteSubwayStations)) {
+      await _prefs.setStringList(_keyFavoriteSubwayStations, ['강남', '판교', '여의도']);
+    }
+  }
+
+  // --- 지하철 즐겨찾기 역 관리 ---
+  List<String> getFavoriteSubwayStations() {
+    return _prefs.getStringList(_keyFavoriteSubwayStations) ?? ['강남', '판교', '여의도'];
+  }
+
+  Future<void> saveFavoriteSubwayStations(List<String> stations) async {
+    await _prefs.setStringList(_keyFavoriteSubwayStations, stations);
+  }
+
+  Future<void> addFavoriteSubwayStation(String station) async {
+    final list = getFavoriteSubwayStations();
+    final clean = station.replaceAll('역', '').trim();
+    if (!list.contains(clean)) {
+      list.insert(0, clean);
+      await saveFavoriteSubwayStations(list);
+    }
+  }
+
+  Future<void> removeFavoriteSubwayStation(String station) async {
+    final clean = station.replaceAll('역', '').trim();
+    final list = getFavoriteSubwayStations()..remove(clean);
+    await saveFavoriteSubwayStations(list);
+  }
+
+  Future<bool> toggleFavoriteSubwayStation(String station) async {
+    final clean = station.replaceAll('역', '').trim();
+    final list = getFavoriteSubwayStations();
+    final isFav = list.contains(clean);
+    if (isFav) {
+      list.remove(clean);
+    } else {
+      list.insert(0, clean);
+    }
+    await saveFavoriteSubwayStations(list);
+    return !isFav;
   }
 
   // --- 즐겨찾기 버스 노선 관리 ---

@@ -41,6 +41,23 @@ class SubwayRepository {
     ];
   }
 
+  /// 복수 개의 즐겨찾기 지하철역 실시간 도착 정보 병렬 조회
+  Future<Map<String, List<SubwayArrivalInfo>>> fetchArrivalsForStations(
+      List<String> stations) async {
+    final results = <String, List<SubwayArrivalInfo>>{};
+    final futures = stations.map((st) async {
+      final clean = st.replaceAll('역', '').trim();
+      final arrivals = await fetchSubwayArrivals(clean);
+      return MapEntry(clean, arrivals);
+    });
+
+    final entries = await Future.wait(futures);
+    for (final entry in entries) {
+      results[entry.key] = entry.value;
+    }
+    return results;
+  }
+
   /// 실시간 지하철 긴급 공지 & 시위/운행 지연 피드
   Future<List<SubwayAlertNotice>> fetchSubwayAlerts() async {
     await Future.delayed(const Duration(milliseconds: 100));

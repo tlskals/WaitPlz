@@ -45,27 +45,29 @@
 
 ---
 
-### 🗓️ 2026-10-10 (추가) - 2번 탭 지하철 노선도 시각화 & 실시간 열차 도착 확인 및 A➡️B 환승 경로 엔진 구축
+### 🗓️ 2026-10-10 (추가) - 2번 탭 지하철 대시보드 전면 개편: 1번 탭과 동일한 즐겨찾기 카드형 UX & 별(★) 즉시 등록 검색
 
 #### 💬 주요 논의 및 기획 의사결정
-1. **인터랙티브 벡터 지하철 노선도 도입 (1번 요구사항)**
-   - 텍스트/리스트 위주의 역 검색 한계를 넘어, 수도권 주요 지하철 노선망(1~9호선, 신분당선, 수인분당선, 공항철도, 경의중앙선 등)을 한눈에 파악할 수 있는 **인터랙티브 벡터 노선도(`SubwayMapViewer`)** 탑재.
-   - 제스처 기반 핀치 줌(확대/축소), 드래그 패닝, 줌 컨트롤(+/-), 뷰 초기화 기능 지원.
-   - 노선별 고유 공식 색상 라인 트랙과 환승역(동심원)/일반역(화이트 서클) 시각화.
-   - 노선도 상의 역 터치 시, 해당 역의 소속 호선 및 **실시간 열차 도착 정보(서울시 공식 API 연동)**와 **출발역/도착역 지정 퀵 버튼**이 포함된 바텀 시트 연동.
-2. **A역 ➡️ B역 최적 환승 경로 안내 엔진 구축 (2번 요구사항)**
-   - 수도권 지하철 역 간 연결망과 가중치(정차역 소요시간 및 환승 페널티)를 반영한 **다익스트라(Dijkstra) 최적 경로 알고리즘(`SubwayGraphService`)** 구현.
-   - 출발역과 도착역을 지정하면 최적 경로, 총 예상 소요 시간, 경유 역 수, 환승 횟수를 실시간 계산.
-   - 노선도 상에 이동 경로를 **네온 라임 하이라이트 트랙**으로 강조 표시.
-   - 구간별 탑승 호선, 경유 역 목록과 함께 실전 출퇴근 필수 팁인 **빠른 환승 문/칸 정보(예: 3호선↔수인분당선 빠른 환승: 4-1번 문 등)** 상세 카드 제공.
-3. **독립성 유지 (3번 탭 연계 제외 원칙 준수)**
-   - 사용자의 명확한 요구("3번과 연계까진하지말자 1,2번만 작업해")에 따라 3번 탭(하차 알람)과의 연계는 배제하고, 2번 탭 내부에서 완결되는 완성도 높은 지하철 탐색/환승 유틸리티로 집중 구현.
+1. **노선도 제거 및 1번 탭과 동일한 깔끔한 카드형 대시보드 구조로 원복/개편**
+   - 시각적으로 복잡하고 가독성을 저해할 수 있는 노선도 및 복잡한 경로 탐색 기능을 과감히 제거.
+   - 1번 탭(`BusDashboardScreen`)과 완벽히 일관된 **다크 테마 + 시그니처 네온 라임 카드 리스트 UX**로 전면 전환.
+   - 상단 15초 주기 실시간 자동 갱신 인디케이터 및 수동 새로고침 지원.
+2. **별도 등록 버튼 없이 검색창에서 별(★) 클릭 한 번으로 즐겨찾기 추가/해제**
+   - 불필요한 등록 버튼이나 화면 이동을 완전히 배제하고, 상단 역 검색창에서 역 이름을 검색한 후 우측 **별(★ / ☆) 아이콘 버튼**을 누르면 즉시 즐겨찾기 추가/해제되는 직관적인 원클릭 UX 구현.
+   - 수도권 주요 지하철역(100여 개 이상) 자동완성 및 직접 입력 역 즉시 대응.
+3. **1번 탭 버스 스타일과 동일한 `SubwayStationCard` 탑재**
+   - 소속 호선 뱃지(고유 색상) + 역 이름 + 별(★) 해제 버튼 + 펼침/접힘 화살표.
+   - 카드 접힘 상태: 1번 탭 버스처럼 상행/내선 및 하행/외선 실시간 도착 정보(예: `3분 후`, `곧 도착`) 2열 분할 그리드 표시.
+   - 카드 펼침 상태: 해당 역의 모든 호선/방면별 실시간 도착 목록 및 열차 위치 상세 표출.
+   - `SharedPreferences` 연동으로 앱 재실행 후에도 즐겨찾기 역 상태 영구 유지.
 
 #### 🛠️ 작업 내용
-- [x] [`subway_graph_service.dart`](file:///Users/tlskals/ProjectW/lib/core/services/subway_graph_service.dart): 수도권 주요 노선망 그래프 구축, 다익스트라 최적 경로 계산 및 주요 환승역 빠른 환승 문 데이터베이스 탑재
-- [x] [`subway_map_viewer.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/subway/subway_map_viewer.dart): `InteractiveViewer` + `CustomPainter` 기반 캔버스 노선도 뷰어, 핀치 줌/패닝, 역 노드 탭 히트테스팅, 경로 네온 라임 하이라이트 구현
-- [x] [`subway_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/subway/subway_screen.dart): 상단 모드 전환(노선도 & 환승 경로 vs 실시간 역 도착), 출발/도착역 선택 및 반전, 구간별 환승 안내 카드 연동
-- [x] 정적 분석(`flutter analyze` 0 issues) 및 시뮬레이터 핫 리스타트/핫 리로드 실기 검증 완료
+- [x] [`local_storage_service.dart`](file:///Users/tlskals/ProjectW/lib/core/services/local_storage_service.dart): 지하철 즐겨찾기 역 저장, 복원 및 토글 메서드 추가
+- [x] [`subway_repository.dart`](file:///Users/tlskals/ProjectW/lib/data/repositories/subway_repository.dart): 여러 즐겨찾기 역의 도착 정보를 한 번에 병렬 조회하는 `fetchArrivalsForStations` 메서드 구현
+- [x] [`subway_dashboard_provider.dart`](file:///Users/tlskals/ProjectW/lib/presentation/providers/subway_dashboard_provider.dart): 즐겨찾기 역 목록 상태 관리 및 15초 주기 실시간 자동 갱신 Notifier 신규 구현
+- [x] [`subway_station_card.dart`](file:///Users/tlskals/ProjectW/lib/presentation/widgets/subway_station_card.dart): 1번 탭 버스 카드와 디자인이 일치하는 2열 분할 지하철 도착 카드 위젯 신규 구축
+- [x] [`subway_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/subway/subway_screen.dart): 노선도 걷어내고 상단 별(★) 즉시 등록 검색창 + 메인 즐겨찾기 카드 리스트로 전면 리팩토링
+- [x] 사용하지 않는 `subway_map_viewer.dart`, `subway_graph_service.dart` 파일 정리 및 `flutter analyze` 0 issues 검증 완료
 
 ---
 
