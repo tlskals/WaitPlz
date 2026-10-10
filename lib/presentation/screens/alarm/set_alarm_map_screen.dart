@@ -738,32 +738,112 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                     ),
                     const SizedBox(height: 8),
 
-                    // 소리 & 진동 토글
+                    // 소리 & 진동 토글 (좌/우 독립 박스로 명확히 분리 및 강력 진동 -> 진동 명칭 변경)
                     Row(
                       children: [
+                        // 1. 소리 토글 박스
                         Expanded(
-                          child: SwitchListTile(
-                            title: const Text('소리',
-                                style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary)),
-                            value: _soundEnabled,
-                            onChanged: (v) => setState(() => _soundEnabled = v),
-                            contentPadding: EdgeInsets.zero,
+                          child: InkWell(
+                            onTap: () => setState(() => _soundEnabled = !_soundEnabled),
+                            borderRadius: BorderRadius.circular(14),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceElevated,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: _soundEnabled
+                                      ? AppColors.neonLime.withValues(alpha: 0.5)
+                                      : AppColors.cardBorder,
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        _soundEnabled ? Icons.volume_up : Icons.volume_off,
+                                        size: 18,
+                                        color: _soundEnabled ? AppColors.neonLime : AppColors.textMuted,
+                                      ),
+                                      const SizedBox(width: 7),
+                                      Text(
+                                        '소리',
+                                        style: TextStyle(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: _soundEnabled ? AppColors.textPrimary : AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Transform.scale(
+                                    scale: 0.8,
+                                    child: Switch(
+                                      value: _soundEnabled,
+                                      onChanged: (v) => setState(() => _soundEnabled = v),
+                                      activeThumbColor: AppColors.neonLime,
+                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 10),
+                        // 2. 진동 토글 박스 (명칭: 진동)
                         Expanded(
-                          child: SwitchListTile(
-                            title: const Text('강력 진동',
-                                style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary)),
-                            value: _vibrationEnabled,
-                            onChanged: (v) =>
-                                setState(() => _vibrationEnabled = v),
-                            contentPadding: EdgeInsets.zero,
+                          child: InkWell(
+                            onTap: () => setState(() => _vibrationEnabled = !_vibrationEnabled),
+                            borderRadius: BorderRadius.circular(14),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceElevated,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: _vibrationEnabled
+                                      ? AppColors.neonLime.withValues(alpha: 0.5)
+                                      : AppColors.cardBorder,
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        _vibrationEnabled ? Icons.vibration : Icons.mobile_off,
+                                        size: 18,
+                                        color: _vibrationEnabled ? AppColors.neonLime : AppColors.textMuted,
+                                      ),
+                                      const SizedBox(width: 7),
+                                      Text(
+                                        '진동',
+                                        style: TextStyle(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: _vibrationEnabled ? AppColors.textPrimary : AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Transform.scale(
+                                    scale: 0.8,
+                                    child: Switch(
+                                      value: _vibrationEnabled,
+                                      onChanged: (v) => setState(() => _vibrationEnabled = v),
+                                      activeThumbColor: AppColors.neonLime,
+                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ],

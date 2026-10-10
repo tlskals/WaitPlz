@@ -41,6 +41,7 @@
 - [x] 하단 바텀 시트 UX 정밀 튜닝: Safe Area 여백 반영으로 완료 버튼 텍스트 잘림 해결, `maxChildSize: 0.52`로 상한선을 제한하여 지도를 가리지 않고 내용이 한눈에 들어오도록 최적화
 - [x] 버튼 내부 폰트 렌더링 최적화: 버튼 내부 상하 패딩 리셋(`EdgeInsets.zero`) 및 이모지 베이스라인 밀림 방지를 위한 Material Icon 분리 배치로 자음/받침 잘림 100% 해소
 - [x] [`transit_alarm_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/transit_alarm_screen.dart): 실시간 GPS 연결 상태 바, 실시간 남은 거리 동적 뱃지, 레이더 지도 뷰 연동
+- [x] 하차 알람 설정 바텀 시트 소리/진동 토글 UX 개선: 한 줄에 붙어 혼동을 주던 구조를 독립된 2개 카드 컨테이너(`[ 🔊 소리  (토글) ]` / `[ 📳 진동  (토글) ]`)로 완벽 분리하고, 4번 탭 진동 세기 설정과의 일관성을 위해 '강력 진동' 명칭을 '진동'으로 직관화
 - [x] 정적 분석(`flutter analyze` No issues) 및 테스트 100% 통과 검증 완료
 
 ---
