@@ -38,6 +38,7 @@
 - [x] [`transit_alarm_item.dart`](file:///Users/tlskals/ProjectW/lib/data/models/transit_alarm_item.dart): 범용 목적지 대응을 위한 `targetAddress` 필드 추가 및 직렬화 하위 호환성 유지
 - [x] [`alarm_provider.dart`](file:///Users/tlskals/ProjectW/lib/presentation/providers/alarm_provider.dart): `userLocationProvider`, `alarmDistancesProvider`, 실시간 지오펜싱 진입 감지 로직 적용
 - [x] [`set_alarm_map_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/set_alarm_map_screen.dart): 풀스크린 네이버 지도, 플로팅 장소 검색창, 터치 핀 지정, GPS 바로가기, 드래그 설정 시트 구현
+- [x] 하단 바텀 시트 UX 정밀 튜닝: Safe Area 여백 반영으로 완료 버튼 텍스트 잘림 해결, `maxChildSize: 0.52`로 상한선을 제한하여 지도를 가리지 않고 내용이 한눈에 들어오도록 최적화
 - [x] [`transit_alarm_screen.dart`](file:///Users/tlskals/ProjectW/lib/presentation/screens/alarm/transit_alarm_screen.dart): 실시간 GPS 연결 상태 바, 실시간 남은 거리 동적 뱃지, 레이더 지도 뷰 연동
 - [x] 정적 분석(`flutter analyze` No issues) 및 테스트 100% 통과 검증 완료
 

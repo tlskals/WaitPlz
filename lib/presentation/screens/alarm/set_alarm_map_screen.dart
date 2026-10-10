@@ -541,10 +541,11 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
 
           // 4. 하단 슬라이딩 설정 시트
           DraggableScrollableSheet(
-            initialChildSize: 0.44,
+            initialChildSize: 0.48,
             minChildSize: 0.22,
-            maxChildSize: 0.85,
+            maxChildSize: 0.52,
             builder: (context, scrollController) {
+              final bottomPadding = MediaQuery.of(context).padding.bottom;
               return Container(
                 decoration: BoxDecoration(
                   color: AppColors.surface,
@@ -561,7 +562,8 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                 ),
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
+                  physics: const ClampingScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(20, 12, 20, 16 + bottomPadding),
                   children: [
                     // 드래그 핸들바
                     Center(
@@ -574,7 +576,7 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 10),
 
                     // 목적지 명칭 & 알람 별칭
                     Row(
@@ -592,24 +594,24 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                             children: [
                               const Text('도착 목적지 (지명 / 도로명 / 역)',
                                   style: TextStyle(
-                                      fontSize: 13,
+                                      fontSize: 12.5,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.textSecondary)),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 3),
                               TextField(
                                 controller: _stationController,
                                 style: const TextStyle(
                                   color: AppColors.textPrimary,
-                                  fontSize: 16,
+                                  fontSize: 15.5,
                                   fontWeight: FontWeight.w800,
                                 ),
                                 decoration: InputDecoration(
                                   hintText: '예: 테헤란로, 강남역, 판교 테크노밸리',
                                   hintStyle: const TextStyle(
-                                      color: AppColors.textMuted, fontSize: 14),
+                                      color: AppColors.textMuted, fontSize: 13.5),
                                   isDense: true,
                                   contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 8, horizontal: 10),
+                                      vertical: 7, horizontal: 10),
                                   filled: true,
                                   fillColor: AppColors.surfaceElevated,
                                   border: OutlineInputBorder(
@@ -623,7 +625,7 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
 
                     // 알람 별칭
                     Column(
@@ -631,21 +633,21 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                       children: [
                         const Text('알람 별칭',
                             style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.textSecondary)),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 3),
                         TextField(
                           controller: _titleController,
                           style: const TextStyle(
-                              color: AppColors.textPrimary, fontSize: 14),
+                              color: AppColors.textPrimary, fontSize: 13.5),
                           decoration: InputDecoration(
                             hintText: '예: 퇴근길 도착 알림, 약속 장소',
                             hintStyle: const TextStyle(
-                                color: AppColors.textMuted, fontSize: 13),
+                                color: AppColors.textMuted, fontSize: 12.5),
                             isDense: true,
                             contentPadding: const EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 10),
+                                vertical: 7, horizontal: 10),
                             filled: true,
                             fillColor: AppColors.surfaceElevated,
                             border: OutlineInputBorder(
@@ -656,7 +658,7 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 12),
 
                     // 반경 슬라이더 & 프리셋
                     Row(
@@ -664,12 +666,12 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                       children: [
                         const Text('알람 울릴 거리 (도착 전 반경)',
                             style: TextStyle(
-                                fontSize: 14.5,
+                                fontSize: 13.5,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.textPrimary)),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                              horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceElevated,
                             borderRadius: BorderRadius.circular(8),
@@ -678,7 +680,7 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                           child: Text(
                             '${_radiusMeters.toInt()}m 전',
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 13,
                               fontWeight: FontWeight.w900,
                               color: AppColors.neonLime,
                             ),
@@ -711,7 +713,7 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
+                                horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? AppColors.neonLime
@@ -725,7 +727,7 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                                       ? '1km (추천)'
                                       : '${r}m',
                               style: TextStyle(
-                                fontSize: 11.5,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 color: isSelected ? Colors.black : AppColors.textSecondary,
                               ),
@@ -734,7 +736,7 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                         );
                       }).toList(),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 8),
 
                     // 소리 & 진동 토글
                     Row(
@@ -743,7 +745,7 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                           child: SwitchListTile(
                             title: const Text('소리',
                                 style: TextStyle(
-                                    fontSize: 13.5,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary)),
                             value: _soundEnabled,
@@ -755,7 +757,7 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                           child: SwitchListTile(
                             title: const Text('강력 진동',
                                 style: TextStyle(
-                                    fontSize: 13.5,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary)),
                             value: _vibrationEnabled,
@@ -766,12 +768,12 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 10),
 
                     // 저장 버튼
                     SizedBox(
                       width: double.infinity,
-                      height: 52,
+                      height: 50,
                       child: ElevatedButton(
                         onPressed: _saveAlarm,
                         style: ElevatedButton.styleFrom(
@@ -783,7 +785,7 @@ class _SetAlarmMapScreenState extends ConsumerState<SetAlarmMapScreen> {
                         ),
                         child: const Text('🔔 이 위치로 하차 알람 설정 완료',
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w900)),
+                                fontSize: 15.5, fontWeight: FontWeight.w900)),
                       ),
                     ),
                   ],
