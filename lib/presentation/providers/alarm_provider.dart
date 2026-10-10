@@ -129,15 +129,15 @@ final alarmDistancesProvider = Provider<Map<String, double>>((ref) {
 
 /// 스마트 하차 알람 관리 Notifier
 class AlarmNotifier extends Notifier<List<TransitAlarmItem>> {
-  late final LocalStorageService _storage;
-  late final LocationService _locationService;
+  LocalStorageService get _storage => ref.read(localStorageServiceProvider);
+  LocationService get _locationService => ref.read(locationServiceProvider);
   final NotificationService _notificationService = NotificationService();
   final Set<String> _triggeredAlarmIds = {};
 
   @override
   List<TransitAlarmItem> build() {
-    _storage = ref.watch(localStorageServiceProvider);
-    _locationService = ref.watch(locationServiceProvider);
+    ref.watch(localStorageServiceProvider);
+    ref.watch(locationServiceProvider);
     return _storage.getTransitAlarms();
   }
 
